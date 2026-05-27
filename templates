@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ميشو</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08080f;
+  --bg2: #0d0d16;
+  --bg3: #111120;
+  --border: #1a1a28;
+  --border2: #222234;
+  --c1: #0055dd;
+  --c1b: #00aaff;
+  --c2: #009944;
+  --c2b: #00dd66;
+  --shared: #cc4400;
+  --shared-b: #ff7722;
+  --text: #fff;
+  --muted: #3a3a50;
+  --muted2: #555570;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px 80px;
+  overflow-x: hidden;
+}
+
+/* ── TITLE ── */
+.title-wrap { text-align: center; margin-bottom: 10px; }
+.title {
+  font-size: 2.2rem; font-weight: 900; letter-spacing: 5px;
+  background: linear-gradient(135deg, #00ccff 0%, #8833ff 50%, #ff5500 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle { font-size: 0.62rem; color: var(--muted); letter-spacing: 3px; margin-top: 2px; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 6px; width: 100%; max-width: 480px;
+  background: var(--bg2); border-radius: 12px; padding: 4px;
+  border: 1px solid var(--border); margin-bottom: 8px;
+}
+.tab {
+  flex: 1; padding: 9px 4px; border-radius: 9px; border: none;
+  font-family: 'Tajawal', sans-serif; font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; color: var(--muted2); background: transparent;
+  transition: all 0.2s; white-space: nowrap;
+}
+.tab.active-1 {
+  background: linear-gradient(135deg, var(--c1), var(--c1b));
+  color: #fff; box-shadow: 0 0 16px #0055dd44;
+}
+.tab.active-2 {
+  background: linear-gradient(135deg, var(--c2), var(--c2b));
+  color: #fff; box-shadow: 0 0 16px #00994444;
+}
+
+/* ── COUNTER ── */
+.counter {
+  width: 100%; max-width: 480px;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 11px; padding: 9px 13px; margin-bottom: 8px;
+}
+.c-label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.c-num { font-size: 1.4rem; font-weight: 900; white-space: nowrap; transition: color 0.3s; }
+.c-num.full { color: #ff4444; }
+.c-num sub { font-size: 0.7rem; color: var(--muted); font-weight: 400; }
+.c-bar-bg { flex: 1; height: 5px; background: var(--border2); border-radius: 99px; overflow: hidden; }
+.c-bar { height: 100%; border-radius: 99px; transition: width 0.3s ease; width: 0%; }
+.c-bar.bar-1 { background: linear-gradient(90deg, var(--c1), var(--c1b)); }
+.c-bar.bar-2 { background: linear-gradient(90deg, var(--c2), var(--c2b)); }
+
+/* ── GRID ── */
+.grid {
+  width: 100%; max-width: 480px;
+  display: grid; grid-template-columns: repeat(10, 1fr);
+  gap: 4px; margin-bottom: 10px;
+}
+.num {
+  aspect-ratio: 1; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(0.44rem, 2.8vw, 0.72rem); font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--border2);
+  background: var(--bg3); color: var(--muted);
+  transition: transform 0.1s, background 0.15s, box-shadow 0.15s;
+  user-select: none; position: relative; overflow: hidden;
+}
+.num:active { transform: scale(0.78); }
+.num.s1 {
+  background: var(--c1); border-color: var(--c1b); color: #fff;
+  box-shadow: 0 0 8px #0055dd66;
+}
+.num.s2 {
+  background: var(--c2); border-color: var(--c2b); color: #fff;
+  box-shadow: 0 0 8px #00994466;
+}
+.num.sb {
+  background: linear-gradient(135deg, var(--c1) 50%, var(--c2) 50%);
+  border-color: #888; color: #fff;
+  box-shadow: 0 0 10px #ffffff18;
+}
+.num.locked { opacity: 0.18; cursor: not-allowed; pointer-events: none; }
+
+/* ── ACTIONS ── */
+.actions {
+  width: 100%; max-width: 480px;
+  display: flex; gap: 6px; margin-bottom: 10px;
+}
+.abtn {
+  flex: 1; padding: 11px 4px; border-radius: 10px; border: none;
+  font-family: 'Tajawal', sans-serif; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; background: var(--bg3); color: var(--muted2);
+  border: 1px solid var(--border); transition: all 0.2s;
+}
+.abtn:active { background: var(--border2); }
+.gen-btn {
+  background: linear-gradient(135deg, #6600ff, #ff4400);
+  color: #fff; border: none; box-shadow: 0 0 16px #6600ff44;
+}
+.gen-btn:active { opacity: 0.8; }
+.gen-btn:disabled { background: var(--bg3); color: var(--muted); box-shadow: none; cursor: not-allowed; border: 1px solid var(--border); }
+
+/* ── RESULTS ── */
+.results { width: 100%; max-width: 480px; }
+
+.analysis-panel {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 13px; padding: 13px; margin-bottom: 10px;
+}
+.panel-title {
+  text-align: center; font-size: 0.85rem; font-weight: 900;
+  margin-bottom: 10px; letter-spacing: 1px;
+}
+.stats-row { display: flex; gap: 10px; }
+.stat-col { flex: 1; }
+.stat-label {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 5px;
+}
+.lv { color: var(--c1b); }
+.ls { color: var(--muted2); }
+.rnums { display: flex; flex-wrap: wrap; gap: 3px; }
+.rn {
+  width: 25px; height: 25px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.58rem; font-weight: 700;
+}
+.rn-v { background: #0055dd22; color: var(--c1b); border: 1px solid #0055dd44; }
+.rn-s { background: #ffffff08; color: var(--muted2); border: 1px solid var(--border); }
+
+.gen-card {
+  background: #060610; border: 1px solid var(--border);
+  border-radius: 11px; padding: 11px; margin-bottom: 8px;
+}
+.gen-card-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 8px;
+}
+.gen-card-title { font-size: 0.72rem; font-weight: 700; color: var(--muted); }
+.gen-card-count { font-size: 0.62rem; color: var(--border2); }
+.gen-nums { display: flex; flex-wrap: wrap; gap: 4px; }
+.gn {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.66rem; font-weight: 700;
+  background: var(--bg3); color: #aaa; border: 1px solid var(--border2);
+}
+.gn-x { background: #6600ff22; color: #aa66ff; border-color: #6600ff44; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #111120; border: 1px solid var(--border2);
+  border-radius: 10px; padding: 10px 20px;
+  font-size: 0.8rem; color: #ccc; opacity: 0;
+  transition: all 0.3s; z-index: 999; white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="title-wrap">
+  <div class="title">ميشو</div>
+  <div class="subtitle">لوحة الأرقام</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active-1" onclick="setTab(1)" id="tab1">البطاقة الأولى (0)</button>
+  <button class="tab" onclick="setTab(2)" id="tab2">البطاقة الثانية (0)</button>
+</div>
+
+<div class="counter" id="counterWrap">
+  <span class="c-label" id="cLabel">البطاقة الأولى</span>
+  <span class="c-num" id="cNum">0<sub>/50</sub></span>
+  <div class="c-bar-bg"><div class="c-bar bar-1" id="cBar"></div></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="actions">
+  <button class="abtn" onclick="resetCurrent()">🗑 مسح</button>
+  <button class="abtn" onclick="resetAll()">🗑 مسح الكل</button>
+  <button class="abtn gen-btn" id="genBtn" onclick="generate()" disabled>⚠️ أكمل</button>
+</div>
+
+<div class="results" id="results"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────────
+const state = {
+  c1: new Set(),
+  c2: new Set(),
+  tab: 1,
+  cards: [],
+  showResults: false
+};
+
+const MAX = 50;
+
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+function getSel() { return state.tab === 1 ? state.c1 : state.c2; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ── ACTIONS ────────────────────────────────────────────────────────────────────
+function toggleNum(n) {
+  const sel = getSel();
+  if (sel.has(n)) {
+    sel.delete(n);
+  } else {
+    if (sel.size >= MAX) {
+      showToast('وصلت الحد الأقصى 50 رقم!');
+      return;
+    }
+    sel.add(n);
+  }
+  state.cards = [];
+  state.showResults = false;
+  render();
+}
+
+function setTab(t) {
+  state.tab = t;
+  render();
+}
+
+function resetCurrent() {
+  getSel().clear();
+  state.cards = [];
+  state.showResults = false;
+  render();
+}
+
+function resetAll() {
+  state.c1.clear();
+  state.c2.clear();
+  state.cards = [];
+  state.showResults = false;
+  render();
+}
+
+function generate() {
+  const c1 = [...state.c1].sort((a,b)=>a-b);
+  const c2 = [...state.c2].sort((a,b)=>a-b);
+  const c1s = new Set(c1), c2s = new Set(c2);
+
+  const shared = [...c1s].filter(n => c2s.has(n)).sort((a,b) => b-a); // تنازلي
+  const vessel = c2.filter(n => !c1s.has(n));                          // صافي البطاقة الثانية
+
+  const v = vessel.length;
+  let nc = Math.floor(v / 5);
+  if (v % 5 >= 4) nc++;
+  if (nc === 0) nc = 1;
+
+  const total = nc * 5;
+  const pool = shuffle([...vessel]);
+  const take = pool.slice(0, Math.min(total, pool.length));
+  const shortage = total - take.length;
+  const extra = shared.slice(0, shortage);
+  const all = shuffle([...take, ...extra]);
+
+  state.cards = [];
+  for (let i = 0; i < nc; i++) {
+    state.cards.push(all.slice(i*5, i*5+5).sort((a,b)=>a-b));
+  }
+  state.showResults = true;
+  render();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────────
+function render() {
+  const { c1, c2, tab } = state;
+  const sel = getSel();
+  const cnt = sel.size;
+  const full = cnt >= MAX;
+  const canGen = c1.size === MAX && c2.size === MAX;
+
+  // TABS
+  document.getElementById('tab1').textContent = `البطاقة الأولى (${c1.size})`;
+  document.getElementById('tab2').textContent = `البطاقة الثانية (${c2.size})`;
+  document.getElementById('tab1').className = 'tab' + (tab===1 ? ' active-1' : '');
+  document.getElementById('tab2').className = 'tab' + (tab===2 ? ' active-2' : '');
+
+  // COUNTER
+  document.getElementById('cLabel').textContent = tab===1 ? 'البطاقة الأولى' : 'البطاقة الثانية';
+  const cNum = document.getElementById('cNum');
+  cNum.innerHTML = `${cnt}<sub>/50</sub>`;
+  cNum.className = 'c-num' + (full ? ' full' : '');
+  const cBar = document.getElementById('cBar');
+  cBar.style.width = (cnt/50*100) + '%';
+  cBar.className = 'c-bar ' + (tab===1 ? 'bar-1' : 'bar-2');
+
+  // GRID
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let n = 1; n <= 90; n++) {
+    const i1 = c1.has(n), i2 = c2.has(n);
+    const lk = full && !sel.has(n);
+    let cls = 'num';
+    if (i1 && i2) cls += ' sb';
+    else if (i1)  cls += ' s1';
+    else if (i2)  cls += ' s2';
+    if (lk)       cls += ' locked';
+    const div = document.createElement('div');
+    div.className = cls;
+    div.textContent = n;
+    if (!lk) div.onclick = () => toggleNum(n);
+    grid.appendChild(div);
+  }
+
+  // GEN BUTTON
+  const genBtn = document.getElementById('genBtn');
+  genBtn.disabled = !canGen;
+  genBtn.textContent = canGen ? '🎯 توليد' : '⚠️ أكمل';
+
+  // RESULTS
+  renderResults();
+}
+
+function renderResults() {
+  const res = document.getElementById('results');
+  if (!state.showResults) { res.innerHTML = ''; return; }
+
+  const c1s = state.c1, c2s = state.c2;
+  const vessel = [...c2s].filter(n => !c1s.has(n)).sort((a,b)=>a-b);
+  const shared = [...c1s].filter(n => c2s.has(n)).sort((a,b)=>a-b);
+  const sharedSet = new Set(shared);
+
+  const vHTML = vessel.map(n => `<div class="rn rn-v">${n}</div>`).join('');
+  const sHTML = shared.map(n => `<div class="rn rn-s">${n}</div>`).join('');
+
+  let html = `
+  <div class="analysis-panel">
+    <div class="panel-title">📊 التحليل</div>
+    <div class="stats-row">
+      <div class="stat-col">
+        <div class="stat-label lv">الوعاء (${vessel.length})</div>
+        <div class="rnums">${vHTML}</div>
+      </div>
+      <div class="stat-col">
+        <div class="stat-label ls">المشترك (${shared.length})</div>
+        <div class="rnums">${sHTML}</div>
+      </div>
+    </div>
+  </div>`;
+
+  state.cards.forEach((card, i) => {
+    const nums = card.map(n =>
+      `<div class="gn ${sharedSet.has(n)?'gn-x':''}">${n}</div>`
+    ).join('');
+    html += `
+    <div class="gen-card">
+      <div class="gen-card-header">
+        <span class="gen-card-title">البطاقة ${i+1}</span>
+        <span class="gen-card-count">${card.length} أرقام</span>
+      </div>
+      <div class="gen-nums">${nums}</div>
+    </div>`;
+  });
+
+  res.innerHTML = html;
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
