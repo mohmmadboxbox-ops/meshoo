@@ -1,9 +1,11 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import random
+import json
 
 st.set_page_config(page_title="ميشو", page_icon="🎯", layout="wide", initial_sidebar_state="collapsed")
 
-# ── CSS (الخدعة الذكية لتطويع Streamlit) ──
+# ── CSS (ترتيب الأعمدة الأساسي فقط) ──────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
@@ -13,6 +15,10 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] { backgro
 header, footer, #MainMenu { display: none !important; }
 [data-testid="stVerticalBlock"] { gap: 0 !important; }
 .element-container { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
+
+/* السحر هنا: إجبار كل الأعمدة على البقاء كشبكة أفقية (تلغي تكسير الموبايل) */
+[data-testid="stHorizontalBlock"] { flex-direction: row-reverse !important; flex-wrap: nowrap !important; gap: 4px !important; margin-bottom: 6px !important; align-items: center !important; }
+[data-testid="column"] { width: auto !important; flex: 1 1 0px !important; min-width: 0 !important; padding: 0 !important; }
 
 /* العناوين والعداد */
 .misho-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; text-align: center; background: linear-gradient(135deg, #00d4ff, #7b2fff, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
@@ -26,49 +32,35 @@ header, footer, #MainMenu { display: none !important; }
 .bar-1 { background: linear-gradient(90deg, #0066ff, #00d4ff); }
 .bar-2 { background: linear-gradient(90deg, #00a844, #00ff88); }
 
-/* ── إجبار الأعمدة على البقاء كشبكة أفقية بالموبايل ── */
-[data-testid="stHorizontalBlock"]:has(.btn-marker),
-[data-testid="stHorizontalBlock"]:has(.tab-marker),
-[data-testid="stHorizontalBlock"]:has(.act-marker) {
-    flex-direction: row-reverse !important; /* من اليمين لليسار */
-    flex-wrap: nowrap !important;
+/* الشكل الافتراضي للأزرار (حتى ما ترمش أو تطلع مربعة) */
+div[data-testid="stButton"] > button {
+    width: 100% !important;
+    aspect-ratio: 1 !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    font-size: clamp(0.55rem, 2.4vw, 0.85rem) !important;
+    font-weight: 700 !important;
+    border: 1.5px solid #1e1e2e !important;
+    background: #13131a !important;
+    color: #444 !important;
+    box-shadow: none !important;
+    min-height: unset !important;
+    transition: 0.15s !important;
+    line-height: 1 !important;
 }
-[data-testid="stHorizontalBlock"]:has(.btn-marker) > [data-testid="column"],
-[data-testid="stHorizontalBlock"]:has(.tab-marker) > [data-testid="column"],
-[data-testid="stHorizontalBlock"]:has(.act-marker) > [data-testid="column"] {
-    width: auto !important; flex: 1 1 0px !important; min-width: 0 !important; padding: 0 !important;
+div[data-testid="stButton"] > button:active { transform: scale(0.8) !important; }
+
+/* تلوين التابات المفعلة */
+div[data-testid="stButton"] > button[kind="primary"] {
+    background: linear-gradient(135deg, #0066ff, #00d4ff) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 0 14px #0066ff55 !important;
 }
-
-/* 1. تصميم التابات */
-[data-testid="stHorizontalBlock"]:has(.tab-marker) { gap: 8px !important; margin-bottom: 14px !important; }
-div.element-container:has(> .tab-marker) + div.element-container div.stButton > button { width: 100% !important; border-radius: 10px !important; padding: 10px !important; background: #13131a !important; color: #555 !important; border: 1px solid #1e1e2e !important; font-family: 'Tajawal' !important; font-weight: 700 !important; }
-div.element-container:has(> .tab-marker.active-1) + div.element-container div.stButton > button { background: linear-gradient(135deg, #0066ff, #00d4ff) !important; color: #fff !important; border: none !important; box-shadow: 0 0 14px #0066ff55 !important; }
-div.element-container:has(> .tab-marker.active-2) + div.element-container div.stButton > button { background: linear-gradient(135deg, #00a844, #00ff88) !important; color: #fff !important; border: none !important; box-shadow: 0 0 14px #00a84455 !important; }
-
-/* 2. تصميم أزرار الأرقام (الدوائر) */
-[data-testid="stHorizontalBlock"]:has(.btn-marker) { gap: 4px !important; margin-bottom: 4px !important; }
-div.element-container:has(> .btn-marker) + div.element-container div.stButton > button {
-    width: 100% !important; aspect-ratio: 1 !important; border-radius: 50% !important; padding: 0 !important;
-    font-size: clamp(0.55rem, 2.4vw, 0.85rem) !important; font-weight: 700 !important;
-    border: 1.5px solid #1e1e2e !important; background: #13131a !important; color: #444 !important;
-    box-shadow: none !important; min-height: unset !important; transition: 0.15s !important;
-}
-div.element-container:has(> .btn-marker) + div.element-container div.stButton > button:active { transform: scale(0.8) !important; }
-div.element-container:has(> .btn-marker.sel-1) + div.element-container div.stButton > button { background: #0066ff !important; border-color: #00d4ff !important; color: #fff !important; box-shadow: 0 0 8px #0066ff88 !important; }
-div.element-container:has(> .btn-marker.sel-2) + div.element-container div.stButton > button { background: #00a844 !important; border-color: #00ff88 !important; color: #fff !important; box-shadow: 0 0 8px #00a84488 !important; }
-div.element-container:has(> .btn-marker.sel-both) + div.element-container div.stButton > button { background: linear-gradient(135deg, #0066ff 50%, #00a844 50%) !important; border-color: #888 !important; color: #fff !important; box-shadow: 0 0 10px #ffffff33 !important; }
-div.element-container:has(> .btn-marker.locked) + div.element-container div.stButton > button { opacity: 0.25 !important; pointer-events: none !important; }
-
-/* 3. تصميم أزرار الإجراءات */
-[data-testid="stHorizontalBlock"]:has(.act-marker) { gap: 8px !important; margin-top: 12px !important; }
-div.element-container:has(> .act-marker) + div.element-container div.stButton > button { width: 100% !important; border-radius: 12px !important; padding: 12px 4px !important; font-size: 0.85rem !important; font-family: 'Tajawal' !important; font-weight: 700 !important; color: #fff !important; }
-div.element-container:has(> .act-marker.btn-reset) + div.element-container div.stButton > button { background: #1e1e2e !important; color: #888 !important; border: 1px solid #2a2a3e !important; }
-div.element-container:has(> .act-marker.btn-gen) + div.element-container div.stButton > button { background: linear-gradient(135deg, #7b2fff, #ff6b35) !important; border: none !important; box-shadow: 0 0 16px #7b2fff55 !important; }
-div.element-container:has(> .act-marker.btn-gen-off) + div.element-container div.stButton > button { background: #111 !important; color: #444 !important; border: 1px solid #222 !important; pointer-events: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── SESSION STATE ──
+# ── SESSION STATE ─────────────────────────────────────────────────────────────
 if "c1" not in st.session_state: st.session_state.c1 = set()
 if "c2" not in st.session_state: st.session_state.c2 = set()
 if "tab" not in st.session_state: st.session_state.tab = 1
@@ -83,21 +75,19 @@ count = len(sel)
 is_full = count >= MAX
 can_gen = len(c1) == MAX and len(c2) == MAX
 
-# ── العناوين ──
+# ── العناوين ──────────────────────────────────────────────────────────────────
 st.markdown('<div class="misho-title">ميشو</div><div class="misho-subtitle">لوحة الأرقام</div>', unsafe_allow_html=True)
 
-# ── التابات ──
+# ── التابات ───────────────────────────────────────────────────────────────────
 t1, t2 = st.columns(2)
 with t1:
-    st.markdown(f'<span class="tab-marker {"active-1" if tab==1 else ""}" style="display:none;"></span>', unsafe_allow_html=True)
-    if st.button(f"البطاقة الأولى ({len(c1)})", key="tab1"):
+    if st.button(f"البطاقة الأولى ({len(c1)})", key="tab1", type="primary" if tab == 1 else "secondary"):
         st.session_state.tab = 1; st.rerun()
 with t2:
-    st.markdown(f'<span class="tab-marker {"active-2" if tab==2 else ""}" style="display:none;"></span>', unsafe_allow_html=True)
-    if st.button(f"البطاقة الثانية ({len(c2)})", key="tab2"):
+    if st.button(f"البطاقة الثانية ({len(c2)})", key="tab2", type="primary" if tab == 2 else "secondary"):
         st.session_state.tab = 2; st.rerun()
 
-# ── العداد ──
+# ── العداد ────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="counter-wrap">
     <span class="counter-label">{'البطاقة الأولى' if tab==1 else 'البطاقة الثانية'}</span>
@@ -106,23 +96,136 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ── شبكة الأرقام السريعة ──
+# ── شبكة الأرقام (أزرار أصلية سريعة بدون أي رفرش) ───────────────────────────
 for r in range(9):
     cols = st.columns(10)
     for c in range(10):
         n = r * 10 + c + 1
-        i1, i2 = n in c1, n in c2
         locked = is_full and (n not in sel)
-        
-        cls = "sel-both" if i1 and i2 else "sel-1" if i1 else "sel-2" if i2 else ""
-        if locked: cls += " locked"
-        
         with cols[c]:
-            # زرع العلامة المخفية للربط مع CSS
-            st.markdown(f'<span class="btn-marker {cls}" style="display:none;"></span>', unsafe_allow_html=True)
-            if st.button(str(n), key=f"btn_{n}"):
-                if not locked:
-                    if n in sel: sel.discard(n)
-                    else: sel.add(n)
-                    st.session_state.cards = []; st.session_state.show = False
-                    st.rer
+            if st.button(str(n), key=f"btn_{n}", disabled=locked):
+                if n in sel: sel.discard(n)
+                else: sel.add(n)
+                st.session_state.cards = []; st.session_state.show = False
+                st.rerun()
+
+# ── أزرار التحكم ──────────────────────────────────────────────────────────────
+a1, a2, a3 = st.columns(3)
+with a1:
+    if st.button("🗑 مسح", key="btn_clr_tab"):
+        if tab == 1: st.session_state.c1 = set()
+        else: st.session_state.c2 = set()
+        st.session_state.cards = []; st.session_state.show = False; st.rerun()
+with a2:
+    if st.button("🗑 مسح الكل", key="btn_clr_all"):
+        st.session_state.c1 = set(); st.session_state.c2 = set()
+        st.session_state.cards = []; st.session_state.show = False; st.rerun()
+with a3:
+    if st.button("🎯 توليد" if can_gen else "⚠️ أكمل", key="btn_gen", disabled=not can_gen):
+        shared = sorted(c1 & c2, reverse=True); vessel = sorted(c2 - c1)
+        v = len(vessel); nc = v // 5
+        if v % 5 >= 4: nc += 1
+        if nc == 0: nc = 1
+        tot = nc * 5; pool = vessel.copy(); random.shuffle(pool)
+        take = pool[:min(tot, len(pool))]
+        extra = shared[:tot-len(take)]; all_n = take + extra; random.shuffle(all_n)
+        st.session_state.cards = [sorted(all_n[i*5:(i+1)*5]) for i in range(nc)]
+        st.session_state.show = True; st.rerun()
+
+# ── النتائج ───────────────────────────────────────────────────────────────────
+if st.session_state.show:
+    v_nums, s_nums = sorted(c2 - c1), sorted(c1 & c2)
+    s_set = set(s_nums)
+    
+    st.markdown(f"""
+    <div style="background:#13131a;border-radius:14px;padding:12px;margin:10px 0;border:1px solid #1e1e2e;text-align:center;">
+        <div style="color:#fff;font-weight:900;margin-bottom:8px;">📊 التحليل</div>
+        <div style="display:flex;gap:10px;font-size:0.8rem;color:#888;">
+            <div style="flex:1;">الوعاء: <span style="color:#00d4ff;">{len(v_nums)}</span></div>
+            <div style="flex:1;">المشترك: <span style="color:#aaa;">{len(s_nums)}</span></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    for i, card in enumerate(st.session_state.cards):
+        nums_divs = "".join(f'<div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;{"background:#7b2fff33;color:#d0aaff;border:1px solid #7b2fff" if n in s_set else "background:#111;color:#ccc;border:1px solid #333"}">{n}</div>' for n in card)
+        st.markdown(f"""
+        <div style="background:#0d0d14;border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid #1e1e2e;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#888;font-size:0.75rem;">
+                <span>البطاقة {i+1}</span><span>{len(card)} أرقام</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">{nums_divs}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ── JAVASCRIPT (الحل السحري للألوان والأشكال اللي يدعم كل الأجهزة) ──────────
+js_code = f"""
+<script>
+const c1 = {json.dumps(list(c1))};
+const c2 = {json.dumps(list(c2))};
+const both = {json.dumps(list(c1 & c2))};
+
+function updateStyles() {{
+    const buttons = window.parent.document.querySelectorAll('div[data-testid="stButton"] > button');
+    buttons.forEach(btn => {{
+        const p = btn.querySelector('p');
+        const text = p ? p.innerText.trim() : btn.innerText.trim();
+        const num = parseInt(text);
+
+        // تعديل أزرار التابات والتحكم (ليست أرقام) لتكون مستطيلة
+        if (isNaN(num)) {{
+            btn.style.aspectRatio = "auto";
+            btn.style.borderRadius = "10px";
+            btn.style.padding = "10px 4px";
+            btn.style.fontSize = "0.85rem";
+            
+            // تلوين زر "توليد" بالبرتقالي
+            if (text.includes("توليد")) {{
+                btn.style.background = "linear-gradient(135deg, #7b2fff, #ff6b35)";
+                btn.style.color = "#fff";
+                btn.style.border = "none";
+                btn.style.boxShadow = "0 0 16px rgba(123, 47, 255, 0.3)";
+            }}
+            return;
+        }}
+
+        // تلوين أزرار الشبكة حسب الاختيار (بدون CSS معقد)
+        if (both.includes(num)) {{
+            btn.style.background = "linear-gradient(135deg, #0066ff 50%, #00a844 50%)";
+            btn.style.borderColor = "#888";
+            btn.style.color = "#fff";
+            btn.style.boxShadow = "0 0 10px rgba(255,255,255,0.2)";
+        }} else if (c1.includes(num)) {{
+            btn.style.background = "#0066ff";
+            btn.style.borderColor = "#00d4ff";
+            btn.style.color = "#fff";
+            btn.style.boxShadow = "0 0 8px rgba(0,102,255,0.5)";
+        }} else if (c2.includes(num)) {{
+            btn.style.background = "#00a844";
+            btn.style.borderColor = "#00ff88";
+            btn.style.color = "#fff";
+            btn.style.boxShadow = "0 0 8px rgba(0,168,68,0.5)";
+        }} else {{
+            btn.style.background = "#13131a";
+            btn.style.borderColor = "#1e1e2e";
+            btn.style.color = "#444";
+            btn.style.boxShadow = "none";
+        }}
+
+        // التأثير على الأزرار المقفلة
+        if (btn.disabled) {{
+            btn.style.opacity = "0.25";
+        }} else {{
+            btn.style.opacity = "1";
+        }}
+    }});
+}}
+
+// تنفيذ فوري
+updateStyles();
+// مراقبة الشاشة لتحديث الألوان بسرعة وبدون رفرش للصفحة
+const observer = new MutationObserver(updateStyles);
+observer.observe(window.parent.document.body, {{ childList: true, subtree: true }});
+</script>
+"""
+components.html(js_code, height=0, width=0)
