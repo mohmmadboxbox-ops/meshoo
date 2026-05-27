@@ -24,33 +24,26 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
 [data-testid="stAppViewContainer"] { padding: 0 !important; }
 [data-testid="stMain"] { padding: 0 !important; }
-.block-container { padding: 0 !important; max-width: 100% !important; }
+.block-container { padding: 16px 8px 40px !important; max-width: 100% !important; }
 header, footer { display: none !important; }
 #MainMenu { display: none !important; }
 
-.misho-app {
-    min-height: 100vh;
-    background: #0a0a0f;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px 8px 24px;
-    direction: rtl;
-}
+/* إزالة فراغات Streamlit الافتراضية حتى تتصل الصفوف ببعضها */
+[data-testid="stVerticalBlock"] { gap: 0 !important; }
+.element-container { margin: 0 !important; padding: 0 !important; }
+[data-testid="stMarkdownContainer"] p { margin-bottom: 0 !important; }
 
-.misho-header { width: 100%; max-width: 520px; text-align: center; margin-bottom: 14px; }
 .misho-title {
-    font-size: 2rem; font-weight: 900; letter-spacing: 4px;
+    font-size: 2rem; font-weight: 900; letter-spacing: 4px; text-align: center;
     background: linear-gradient(135deg, #00d4ff, #7b2fff, #ff6b35);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px;
 }
-.misho-subtitle { font-size: 0.78rem; color: #555; letter-spacing: 2px; text-transform: uppercase; }
+.misho-subtitle { font-size: 0.78rem; color: #555; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 16px;}
 
 .tab-bar {
-    display: flex; gap: 8px; margin-bottom: 14px;
+    display: flex; gap: 8px; margin: 0 auto 14px auto;
     background: #13131a; border-radius: 14px; padding: 5px; border: 1px solid #1e1e2e;
-    width: 100%; max-width: 520px;
+    width: 100%; max-width: 520px; direction: rtl;
 }
 .tab-btn {
     flex: 1; padding: 10px 18px; border-radius: 10px; border: none;
@@ -62,7 +55,7 @@ header, footer { display: none !important; }
 
 .counter-wrap {
     width: 100%; max-width: 520px; display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px; padding: 10px 16px; background: #13131a; border-radius: 14px; border: 1px solid #1e1e2e;
+    margin: 0 auto 16px auto; padding: 10px 16px; background: #13131a; border-radius: 14px; border: 1px solid #1e1e2e; direction: rtl;
 }
 .counter-label { font-size: 0.8rem; color: #666; }
 .counter-num { font-size: 1.5rem; font-weight: 900; color: #fff; }
@@ -72,12 +65,8 @@ header, footer { display: none !important; }
 .bar-1 { background: linear-gradient(90deg, #0066ff, #00d4ff); }
 .bar-2 { background: linear-gradient(90deg, #00a844, #00ff88); }
 
-.numbers-grid {
-    width: 100%; max-width: 520px; display: grid; grid-template-columns: repeat(10, 1fr);
-    gap: 5px; margin-bottom: 14px;
-}
 .num-circle {
-    aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    width: 100%; aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: clamp(0.55rem, 2.2vw, 0.78rem); font-weight: 700; border: 1.5px solid #1e1e2e;
     background: #13131a; color: #444; transition: 0.2s;
 }
@@ -86,7 +75,7 @@ header, footer { display: none !important; }
 .sel-both { border-color: #888; color: #fff; background: linear-gradient(135deg, #0066ff 50%, #00a844 50%); box-shadow: 0 0 12px #ffffff33; }
 .locked { opacity: 0.3; pointer-events: none; }
 
-.action-row { width: 100%; max-width: 520px; display: flex; gap: 8px; margin-bottom: 10px; }
+.action-row { width: 100%; max-width: 520px; display: flex; gap: 8px; margin: 16px auto 10px auto; direction: rtl; }
 .action-btn {
     flex: 1; padding: 12px 8px; border-radius: 12px; border: none;
     font-family: 'Tajawal', sans-serif; font-size: 0.85rem; font-weight: 700; color: #fff; width: 100%;
@@ -161,43 +150,49 @@ count = len(sel)
 is_full = count >= MAX
 can_gen = len(c1) == MAX and len(c2) == MAX
 
-# ── HTML BUILDER ──────────────────────────────────────────────────────────────
-# إضافة \n لمنع توقف Streamlit عن ترجمة الأكواد الطويلة
-grid_html = '<div class="numbers-grid">\\n'
-for n in range(1, 91):
-    i1, i2 = n in c1, n in c2
-    locked = is_full and (n not in sel)
-    
-    classes = ["num-circle"]
-    if i1 and i2: classes.append("sel-both")
-    elif i1: classes.append("sel-1")
-    elif i2: classes.append("sel-2")
-    
-    if locked: classes.append("locked")
-    class_str = " ".join(classes)
-    
-    if locked:
-        grid_html += f'    <div class="{class_str}">{n}</div>\\n'
-    else:
-        grid_html += f'    <a href="?toggle={n}" style="text-decoration:none;"><div class="{class_str}">{n}</div></a>\\n'
-grid_html += '</div>\\n'
+# ── RENDER UI ─────────────────────────────────────────────────────────────────
+# العناوين والعدادات
+st.markdown('<div class="misho-title">ميشو</div><div class="misho-subtitle">لوحة الأرقام</div>', unsafe_allow_html=True)
 
-tabs_html = f"""
+st.markdown(f"""
 <div class="tab-bar">
     <a href="?tab=1" style="text-decoration:none;flex:1"><button class="tab-btn {'active-1' if tab==1 else ''}">البطاقة الأولى ({len(c1)})</button></a>
     <a href="?tab=2" style="text-decoration:none;flex:1"><button class="tab-btn {'active-2' if tab==2 else ''}">البطاقة الثانية ({len(c2)})</button></a>
 </div>
-"""
+""", unsafe_allow_html=True)
 
-counter_html = f"""
+st.markdown(f"""
 <div class="counter-wrap">
     <span class="counter-label">{'البطاقة الأولى' if tab==1 else 'البطاقة الثانية'}</span>
     <span class="counter-num">{count}<span>/{MAX}</span></span>
     <div class="counter-bar-bg"><div class="counter-bar-fill {'bar-1' if tab==1 else 'bar-2'}" style="width:{int(count/MAX*100) if MAX > 0 else 0}%"></div></div>
 </div>
-"""
+""", unsafe_allow_html=True)
 
-actions_html = f"""
+# طباعة الشبكة صف بصف لتجاوز الخلل البرمجي في Streamlit
+for r in range(9):
+    row_html = '<div style="display:flex; gap:5px; width:100%; max-width:520px; margin: 0 auto 5px auto; direction:rtl;">'
+    for c in range(10):
+        n = r * 10 + c + 1
+        i1, i2 = n in c1, n in c2
+        locked = is_full and (n not in sel)
+        
+        classes = ["num-circle"]
+        if i1 and i2: classes.append("sel-both")
+        elif i1: classes.append("sel-1")
+        elif i2: classes.append("sel-2")
+        if locked: classes.append("locked")
+        
+        cls_str = " ".join(classes)
+        if locked:
+            row_html += f'<div style="flex:1;"><div class="{cls_str}">{n}</div></div>'
+        else:
+            row_html += f'<div style="flex:1;"><a href="?toggle={n}" style="text-decoration:none;"><div class="{cls_str}">{n}</div></a></div>'
+    row_html += '</div>'
+    st.markdown(row_html, unsafe_allow_html=True)
+
+# أزرار التحكم
+st.markdown(f"""
 <div class="action-row">
     <a href="?action=reset" style="text-decoration:none;flex:1"><button class="action-btn btn-reset">🗑 مسح</button></a>
     <a href="?action=reset_all" style="text-decoration:none;flex:1"><button class="action-btn btn-reset">🗑 مسح الكل</button></a>
@@ -205,45 +200,31 @@ actions_html = f"""
         <button class="action-btn {'btn-filter' if can_gen else 'btn-disabled'}">{'🎯 توليد' if can_gen else '⚠️ أكمل'}</button>
     </a>
 </div>
-"""
+""", unsafe_allow_html=True)
 
-results_html = ""
+# النتائج
 if st.session_state.show:
     v_nums = sorted(c2 - c1)
     s_nums = sorted(c1 & c2)
     s_set = set(s_nums)
     
-    results_html += f"""
-    <div style="width:100%;max-width:520px;background:#13131a;border-radius:14px;padding:12px;margin-top:10px;border:1px solid #1e1e2e;">
+    st.markdown(f"""
+    <div style="width:100%;max-width:520px;background:#13131a;border-radius:14px;padding:12px;margin:0 auto 10px auto;border:1px solid #1e1e2e;direction:rtl;">
         <div style="color:#fff;font-weight:900;text-align:center;margin-bottom:8px;">📊 التحليل</div>
         <div style="display:flex;gap:10px;font-size:0.8rem;color:#888;">
             <div style="flex:1;">الوعاء: <span style="color:#00d4ff;">{len(v_nums)}</span></div>
             <div style="flex:1;">المشترك: <span style="color:#aaa;">{len(s_nums)}</span></div>
         </div>
-    </div>\\n
-    """
+    </div>
+    """, unsafe_allow_html=True)
     
     for i, card in enumerate(st.session_state.cards):
         nums_divs = "".join(f'<div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;{"background:#7b2fff33;color:#d0aaff;border:1px solid #7b2fff" if n in s_set else "background:#111;color:#ccc;border:1px solid #333"}">{n}</div>' for n in card)
-        results_html += f"""
-        <div style="width:100%;max-width:520px;background:#0d0d14;border-radius:12px;padding:12px;margin-top:8px;border:1px solid #1e1e2e;">
+        st.markdown(f"""
+        <div style="width:100%;max-width:520px;background:#0d0d14;border-radius:12px;padding:12px;margin:0 auto 8px auto;border:1px solid #1e1e2e;direction:rtl;">
             <div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#888;font-size:0.75rem;">
                 <span>البطاقة {i+1}</span><span>{len(card)} أرقام</span>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;">{nums_divs}</div>
-        </div>\\n
-        """
-
-st.markdown(f"""
-<div class="misho-app">
-    <div class="misho-header">
-        <div class="misho-title">ميشو</div>
-        <div class="misho-subtitle">لوحة الأرقام</div>
-    </div>
-    {tabs_html}
-    {counter_html}
-    {grid_html}
-    {actions_html}
-    {results_html}
-</div>
-""", unsafe_allow_html=True)
+        </div>
+        """, unsafe_allow_html=True)
