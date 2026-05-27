@@ -106,7 +106,7 @@ if "show" not in st.session_state: st.session_state.show = False
 
 MAX = 50
 
-# ── URL PARAMETERS HANDLING (NO BUGS) ─────────────────────────────────────────
+# ── URL PARAMETERS HANDLING ───────────────────────────────────────────────────
 params = st.query_params
 if "toggle" in params:
     try:
@@ -132,7 +132,6 @@ if "action" in params:
         st.session_state.c1 = set()
         st.session_state.c2 = set()
     elif act == "gen":
-        # Generate Logic
         c1, c2 = st.session_state.c1, st.session_state.c2
         shared = sorted(c1 & c2, reverse=True)
         vessel = sorted(c2 - c1)
@@ -163,18 +162,25 @@ is_full = count >= MAX
 can_gen = len(c1) == MAX and len(c2) == MAX
 
 # ── HTML BUILDER ──────────────────────────────────────────────────────────────
-grid_html = '<div class="numbers-grid">'
+# إضافة \n لمنع توقف Streamlit عن ترجمة الأكواد الطويلة
+grid_html = '<div class="numbers-grid">\\n'
 for n in range(1, 91):
     i1, i2 = n in c1, n in c2
-    cls = "sel-both" if (i1 and i2) else "sel-1" if i1 else "sel-2" if i2 else ""
     locked = is_full and (n not in sel)
-    lock_cls = " locked" if locked else ""
+    
+    classes = ["num-circle"]
+    if i1 and i2: classes.append("sel-both")
+    elif i1: classes.append("sel-1")
+    elif i2: classes.append("sel-2")
+    
+    if locked: classes.append("locked")
+    class_str = " ".join(classes)
     
     if locked:
-        grid_html += f'<div class="num-circle {cls}{lock_cls}">{n}</div>'
+        grid_html += f'    <div class="{class_str}">{n}</div>\\n'
     else:
-        grid_html += f'<a href="?toggle={n}" style="text-decoration:none;"><div class="num-circle {cls}{lock_cls}">{n}</div></a>'
-grid_html += '</div>'
+        grid_html += f'    <a href="?toggle={n}" style="text-decoration:none;"><div class="{class_str}">{n}</div></a>\\n'
+grid_html += '</div>\\n'
 
 tabs_html = f"""
 <div class="tab-bar">
@@ -187,7 +193,7 @@ counter_html = f"""
 <div class="counter-wrap">
     <span class="counter-label">{'البطاقة الأولى' if tab==1 else 'البطاقة الثانية'}</span>
     <span class="counter-num">{count}<span>/{MAX}</span></span>
-    <div class="counter-bar-bg"><div class="counter-bar-fill {'bar-1' if tab==1 else 'bar-2'}" style="width:{int(count/MAX*100)}%"></div></div>
+    <div class="counter-bar-bg"><div class="counter-bar-fill {'bar-1' if tab==1 else 'bar-2'}" style="width:{int(count/MAX*100) if MAX > 0 else 0}%"></div></div>
 </div>
 """
 
@@ -207,7 +213,6 @@ if st.session_state.show:
     s_nums = sorted(c1 & c2)
     s_set = set(s_nums)
     
-    # Simple summary results
     results_html += f"""
     <div style="width:100%;max-width:520px;background:#13131a;border-radius:14px;padding:12px;margin-top:10px;border:1px solid #1e1e2e;">
         <div style="color:#fff;font-weight:900;text-align:center;margin-bottom:8px;">📊 التحليل</div>
@@ -215,10 +220,9 @@ if st.session_state.show:
             <div style="flex:1;">الوعاء: <span style="color:#00d4ff;">{len(v_nums)}</span></div>
             <div style="flex:1;">المشترك: <span style="color:#aaa;">{len(s_nums)}</span></div>
         </div>
-    </div>
+    </div>\\n
     """
     
-    # Generated Cards
     for i, card in enumerate(st.session_state.cards):
         nums_divs = "".join(f'<div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;{"background:#7b2fff33;color:#d0aaff;border:1px solid #7b2fff" if n in s_set else "background:#111;color:#ccc;border:1px solid #333"}">{n}</div>' for n in card)
         results_html += f"""
@@ -227,7 +231,7 @@ if st.session_state.show:
                 <span>البطاقة {i+1}</span><span>{len(card)} أرقام</span>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;">{nums_divs}</div>
-        </div>
+        </div>\\n
         """
 
 st.markdown(f"""
