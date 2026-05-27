@@ -5,58 +5,88 @@ import json
 
 st.set_page_config(page_title="ميشو", page_icon="🎯", layout="wide", initial_sidebar_state="collapsed")
 
-# ── CSS (ترتيب الأعمدة الأساسي فقط) ──────────────────────────────────────────
+# ── CSS (حل مشكلة التكسير والترتيب للموبايل) ──────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
 
-html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background: #0a0a0f !important; font-family: 'Tajawal', sans-serif !important; direction: rtl; }
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    background: #0a0a0f !important;
+    font-family: 'Tajawal', sans-serif !important;
+    direction: rtl;
+}
 .block-container { padding: 16px 8px 40px !important; max-width: 520px !important; margin: 0 auto !important; }
 header, footer, #MainMenu { display: none !important; }
 [data-testid="stVerticalBlock"] { gap: 0 !important; }
 .element-container { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
 
-/* السحر هنا: إجبار كل الأعمدة على البقاء كشبكة أفقية (تلغي تكسير الموبايل) */
-[data-testid="stHorizontalBlock"] { flex-direction: row-reverse !important; flex-wrap: nowrap !important; gap: 4px !important; margin-bottom: 6px !important; align-items: center !important; }
-[data-testid="column"] { width: auto !important; flex: 1 1 0px !important; min-width: 0 !important; padding: 0 !important; }
+/* 1. السحر هنا: غصب Streamlit يخلي الأعمدة أفقية بالموبايل وما يكسرها */
+[data-testid="stHorizontalBlock"] {
+    flex-direction: row-reverse !important; /* من اليمين لليسار */
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 4px !important;
+    margin-bottom: 6px !important;
+}
+[data-testid="column"] {
+    width: auto !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+}
+
+/* 2. الشكل الأساسي لكل الأزرار */
+div.stButton > button {
+    width: 100% !important;
+    border: 1.5px solid #1e1e2e !important;
+    background: #13131a !important;
+    color: #555 !important;
+    font-family: 'Tajawal', sans-serif !important;
+    font-weight: 700 !important;
+    transition: all 0.15s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+}
+div.stButton > button:active { transform: scale(0.85) !important; }
+div.stButton > button p { margin: 0 !important; }
+
+/* 3. التصاميم اللي يضيفها الجافاسكربت (بدون أكواد معقدة) */
+.text-btn {
+    border-radius: 10px !important;
+    min-height: 42px !important;
+    font-size: 0.85rem !important;
+}
+.num-btn {
+    border-radius: 50% !important;
+    height: clamp(30px, 8vw, 42px) !important; /* يجبر الزر يكون دائرة مثالية */
+    min-height: 0 !important;
+    padding: 0 !important;
+    font-size: clamp(0.6rem, 2.2vw, 0.9rem) !important;
+}
+
+/* 4. ألوان الأرقام والتابات */
+.sel-1 { background: #0066ff !important; border-color: #00d4ff !important; color: #fff !important; box-shadow: 0 0 8px #0066ff66 !important; }
+.sel-2 { background: #00a844 !important; border-color: #00ff88 !important; color: #fff !important; box-shadow: 0 0 8px #00a84466 !important; }
+.sel-both { background: linear-gradient(135deg, #0066ff 50%, #00a844 50%) !important; border-color: #aaa !important; color: #fff !important; }
+.locked { opacity: 0.25 !important; pointer-events: none !important; }
+
+.tab-active-1 { background: linear-gradient(135deg, #0066ff, #00d4ff) !important; color: #fff !important; border: none !important; box-shadow: 0 0 12px #0066ff55 !important; }
+.tab-active-2 { background: linear-gradient(135deg, #00a844, #00ff88) !important; color: #fff !important; border: none !important; box-shadow: 0 0 12px #00a84455 !important; }
+.btn-gen { background: linear-gradient(135deg, #7b2fff, #ff6b35) !important; color: #fff !important; border: none !important; box-shadow: 0 0 14px #7b2fff55 !important; }
 
 /* العناوين والعداد */
 .misho-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; text-align: center; background: linear-gradient(135deg, #00d4ff, #7b2fff, #ff6b35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
 .misho-subtitle { font-size: 0.8rem; color: #555; letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 16px;}
-.counter-wrap { display: flex; align-items: center; justify-content: space-between; margin: 14px 0; padding: 10px 16px; background: #13131a; border-radius: 14px; border: 1px solid #1e1e2e; }
-.counter-label { font-size: 0.8rem; color: #666; }
-.counter-num { font-size: 1.5rem; font-weight: 900; color: #fff; }
-.counter-num span { font-size: 0.9rem; color: #444; }
+.counter-wrap { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 16px 0; padding: 10px 16px; background: #13131a; border-radius: 12px; border: 1px solid #1e1e2e; }
+.counter-label { font-size: 0.8rem; color: #666; font-weight: bold; }
+.counter-num { font-size: 1.4rem; font-weight: 900; color: #fff; }
+.counter-num span { font-size: 0.8rem; color: #444; }
 .counter-bar-bg { flex: 1; margin: 0 12px; height: 6px; background: #1e1e2e; border-radius: 99px; overflow: hidden; }
 .counter-bar-fill { height: 100%; border-radius: 99px; transition: width 0.3s; }
 .bar-1 { background: linear-gradient(90deg, #0066ff, #00d4ff); }
 .bar-2 { background: linear-gradient(90deg, #00a844, #00ff88); }
-
-/* الشكل الافتراضي للأزرار (حتى ما ترمش أو تطلع مربعة) */
-div[data-testid="stButton"] > button {
-    width: 100% !important;
-    aspect-ratio: 1 !important;
-    border-radius: 50% !important;
-    padding: 0 !important;
-    font-size: clamp(0.55rem, 2.4vw, 0.85rem) !important;
-    font-weight: 700 !important;
-    border: 1.5px solid #1e1e2e !important;
-    background: #13131a !important;
-    color: #444 !important;
-    box-shadow: none !important;
-    min-height: unset !important;
-    transition: 0.15s !important;
-    line-height: 1 !important;
-}
-div[data-testid="stButton"] > button:active { transform: scale(0.8) !important; }
-
-/* تلوين التابات المفعلة */
-div[data-testid="stButton"] > button[kind="primary"] {
-    background: linear-gradient(135deg, #0066ff, #00d4ff) !important;
-    color: #fff !important;
-    border: none !important;
-    box-shadow: 0 0 14px #0066ff55 !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -81,10 +111,10 @@ st.markdown('<div class="misho-title">ميشو</div><div class="misho-subtitle">
 # ── التابات ───────────────────────────────────────────────────────────────────
 t1, t2 = st.columns(2)
 with t1:
-    if st.button(f"البطاقة الأولى ({len(c1)})", key="tab1", type="primary" if tab == 1 else "secondary"):
+    if st.button(f"البطاقة الأولى ({len(c1)})", key="tab1"):
         st.session_state.tab = 1; st.rerun()
 with t2:
-    if st.button(f"البطاقة الثانية ({len(c2)})", key="tab2", type="primary" if tab == 2 else "secondary"):
+    if st.button(f"البطاقة الثانية ({len(c2)})", key="tab2"):
         st.session_state.tab = 2; st.rerun()
 
 # ── العداد ────────────────────────────────────────────────────────────────────
@@ -96,7 +126,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ── شبكة الأرقام (أزرار أصلية سريعة بدون أي رفرش) ───────────────────────────
+# ── شبكة الأرقام (سريعة جداً بدون رفرش) ─────────────────────────────────────────
 for r in range(9):
     cols = st.columns(10)
     for c in range(10):
@@ -158,73 +188,43 @@ if st.session_state.show:
         </div>
         """, unsafe_allow_html=True)
 
-# ── JAVASCRIPT (الحل السحري للألوان والأشكال اللي يدعم كل الأجهزة) ──────────
+# ── JAVASCRIPT (لتلوين الأزرار بسرعة وبدون تخريب الواجهة) ─────────────────────
 js_code = f"""
 <script>
 const c1 = {json.dumps(list(c1))};
 const c2 = {json.dumps(list(c2))};
 const both = {json.dumps(list(c1 & c2))};
+const activeTab = {tab};
 
-function updateStyles() {{
-    const buttons = window.parent.document.querySelectorAll('div[data-testid="stButton"] > button');
-    buttons.forEach(btn => {{
+function applyStyles() {{
+    const btns = window.parent.document.querySelectorAll('div[data-testid="stButton"] > button');
+    btns.forEach(btn => {{
         const p = btn.querySelector('p');
-        const text = p ? p.innerText.trim() : btn.innerText.trim();
-        const num = parseInt(text);
+        const txt = p ? p.innerText.trim() : btn.innerText.trim();
+        const num = parseInt(txt);
 
-        // تعديل أزرار التابات والتحكم (ليست أرقام) لتكون مستطيلة
-        if (isNaN(num)) {{
-            btn.style.aspectRatio = "auto";
-            btn.style.borderRadius = "10px";
-            btn.style.padding = "10px 4px";
-            btn.style.fontSize = "0.85rem";
-            
-            // تلوين زر "توليد" بالبرتقالي
-            if (text.includes("توليد")) {{
-                btn.style.background = "linear-gradient(135deg, #7b2fff, #ff6b35)";
-                btn.style.color = "#fff";
-                btn.style.border = "none";
-                btn.style.boxShadow = "0 0 16px rgba(123, 47, 255, 0.3)";
-            }}
-            return;
-        }}
+        // تنظيف الكلاسات القديمة
+        btn.classList.remove("num-btn", "text-btn", "sel-1", "sel-2", "sel-both", "locked", "btn-gen", "tab-active-1", "tab-active-2");
 
-        // تلوين أزرار الشبكة حسب الاختيار (بدون CSS معقد)
-        if (both.includes(num)) {{
-            btn.style.background = "linear-gradient(135deg, #0066ff 50%, #00a844 50%)";
-            btn.style.borderColor = "#888";
-            btn.style.color = "#fff";
-            btn.style.boxShadow = "0 0 10px rgba(255,255,255,0.2)";
-        }} else if (c1.includes(num)) {{
-            btn.style.background = "#0066ff";
-            btn.style.borderColor = "#00d4ff";
-            btn.style.color = "#fff";
-            btn.style.boxShadow = "0 0 8px rgba(0,102,255,0.5)";
-        }} else if (c2.includes(num)) {{
-            btn.style.background = "#00a844";
-            btn.style.borderColor = "#00ff88";
-            btn.style.color = "#fff";
-            btn.style.boxShadow = "0 0 8px rgba(0,168,68,0.5)";
+        if (/^\\d+$/.test(txt)) {{
+            btn.classList.add("num-btn");
+            if (both.includes(num)) btn.classList.add("sel-both");
+            else if (c1.includes(num)) btn.classList.add("sel-1");
+            else if (c2.includes(num)) btn.classList.add("sel-2");
+
+            if (btn.disabled) btn.classList.add("locked");
         }} else {{
-            btn.style.background = "#13131a";
-            btn.style.borderColor = "#1e1e2e";
-            btn.style.color = "#444";
-            btn.style.boxShadow = "none";
-        }}
-
-        // التأثير على الأزرار المقفلة
-        if (btn.disabled) {{
-            btn.style.opacity = "0.25";
-        }} else {{
-            btn.style.opacity = "1";
+            btn.classList.add("text-btn");
+            if (txt.includes("توليد")) btn.classList.add("btn-gen");
+            if (txt.includes("الأولى") && activeTab === 1) btn.classList.add("tab-active-1");
+            if (txt.includes("الثانية") && activeTab === 2) btn.classList.add("tab-active-2");
         }}
     }});
 }}
 
-// تنفيذ فوري
-updateStyles();
-// مراقبة الشاشة لتحديث الألوان بسرعة وبدون رفرش للصفحة
-const observer = new MutationObserver(updateStyles);
+// التنفيذ والمراقبة
+applyStyles();
+const observer = new MutationObserver(applyStyles);
 observer.observe(window.parent.document.body, {{ childList: true, subtree: true }});
 </script>
 """
